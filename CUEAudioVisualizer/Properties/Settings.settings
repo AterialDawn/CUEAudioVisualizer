@@ -1,0 +1,21 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="CUEAudioVisualizer.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="PrimaryColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Blue</Value>
+    </Setting>
+    <Setting Name="SecondaryColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">150, 150, 255</Value>
+    </Setting>
+    <Setting Name="DeviceIndex" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-1</Value>
+    </Setting>
+    <Setting Name="VisualizerMode" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Spectrum</Value>
+    </Setting>
+    <Setting Name="VolumeModifier" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
