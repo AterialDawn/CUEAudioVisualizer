@@ -58,6 +58,7 @@ namespace CUEAudioVisualizer
 
             //Update settings and notify visualizer
             Properties.Settings.Default.DeviceIndex = deviceId;
+            Properties.Settings.Default.Save();
             visualizer.UpdateFromSettings();
         }
 
@@ -101,12 +102,6 @@ namespace CUEAudioVisualizer
             Application.Exit();
         }
 
-        //Shows a balloon tip to let the user know to select a device
-        private void mainForm_Load(object sender, EventArgs e)
-        {
-            
-        }
-
         //Handles the changing of the Primary Color
         private void primaryColorMenuItem_Click(object sender, EventArgs e)
         {
@@ -118,6 +113,7 @@ namespace CUEAudioVisualizer
                     Color chosenColor = colorDialog.Color;
                     primaryColorMenuItem.BackColor = chosenColor;
                     Properties.Settings.Default.PrimaryColor = chosenColor;
+                    Properties.Settings.Default.Save();
                     visualizer.UpdateFromSettings();
                 }
             }
@@ -134,6 +130,7 @@ namespace CUEAudioVisualizer
                     Color chosenColor = colorDialog.Color;
                     secondaryColorMenuItem.BackColor = chosenColor;
                     Properties.Settings.Default.SecondaryColor = chosenColor;
+                    Properties.Settings.Default.Save();
                     visualizer.UpdateFromSettings();
                 }
             }
@@ -145,6 +142,8 @@ namespace CUEAudioVisualizer
             vUToolStripMenuItem.Checked = false;
             spectrumToolStripMenuItem.Checked = true;
             visualizer.VisualizerMode = KeyboardVisualizerMode.Spectrum;
+            Properties.Settings.Default.VisualizerMode = "Spectrum";
+            Properties.Settings.Default.Save();
         }
 
         //Changes Vis mode to VU
@@ -153,6 +152,8 @@ namespace CUEAudioVisualizer
             vUToolStripMenuItem.Checked = true;
             spectrumToolStripMenuItem.Checked = false;
             visualizer.VisualizerMode = KeyboardVisualizerMode.VUMeter;
+            Properties.Settings.Default.VisualizerMode = "VU";
+            Properties.Settings.Default.Save();
         }
 
         //Helper function to set checked visualizer button

@@ -161,7 +161,6 @@
             this.Name = "mainForm";
             this.Text = "CUEAudioVisualizerForm";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.mainForm_FormClosing);
-            this.Load += new System.EventHandler(this.mainForm_Load);
             this.mainMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
