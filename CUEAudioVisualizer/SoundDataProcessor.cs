@@ -10,7 +10,7 @@ namespace CUEAudioVisualizer
 {
     //This class was written a long time ago as a newbie programmer, there are tons of magic values, suboptimal usage of variables, hardcoded constants, etc etc
     //I apologise for this mess of code but it works decently well so i'm not going to be fixing it
-    public class SoundDataProcessor
+    class SoundDataProcessor
     {
         public const int BarCount = 1000;
 
