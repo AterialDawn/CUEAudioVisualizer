@@ -74,14 +74,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\ModeNotFoundException.cs" />
+    <Compile Include="Exceptions\WASAPIInitializationException.cs" />
+    <Compile Include="Plugins\SpectrumPlugin.cs" />
+    <Compile Include="Plugins\VUPlugin.cs" />
+    <Compile Include="Plugin\IPlugin.cs" />
+    <Compile Include="Plugin\IPluginHost.cs" />
     <Compile Include="KeyboardVisualizer.cs" />
-    <Compile Include="KeyboardVisualizerMode.cs" />
     <Compile Include="mainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="mainForm.Designer.cs">
       <DependentUpon>mainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="PluginLoader.cs" />
+    <Compile Include="Plugin\VisualizerModes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -90,7 +97,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="SoundDataProcessor.cs" />
-    <Compile Include="ThreadedConsoleReader.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>

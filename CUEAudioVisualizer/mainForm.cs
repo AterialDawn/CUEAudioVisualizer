@@ -6,11 +6,13 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using CUEAudioVisualizer.Exceptions;
+using CUEAudioVisualizer.Plugin;
 using Un4seen.BassWasapi;
 
 namespace CUEAudioVisualizer
 {
-    public partial class mainForm : Form
+    partial class mainForm : Form
     {
         private bool IsVisible = false;
         private KeyboardVisualizer visualizer;
@@ -27,9 +29,18 @@ namespace CUEAudioVisualizer
                 System.Windows.Forms.MessageBox.Show("Unable to initialize CUE support!", "Error", System.Windows.Forms.MessageBoxButtons.OK);
                 Application.Exit();
             }
-
-            SetCheckedVisualizerButton();
+            try
+            {
+                visualizer.UpdateFromSettings();
+            }
+            catch (ModeNotFoundException)
+            {
+                //On a ModeNotFoundException, reset the default mode to "Spectrum,Spectrum". This mode is built-in, and should never not be found
+                Properties.Settings.Default.VisualizerMode = "Spectrum,Spectrum";
+                visualizer.UpdateFromSettings();
+            }
             AddValidWasapiDevices();
+            AddVisualizerModes();
             ShowNotifyIcon();
         }
 
@@ -62,7 +73,32 @@ namespace CUEAudioVisualizer
             visualizer.UpdateFromSettings();
         }
 
-        
+        void ChangeVisualizerModeItemClicked(object sender, EventArgs e)
+        {
+            ToolStripMenuItem clickedItem = sender as ToolStripMenuItem;
+            if (clickedItem == null) return;
+
+            string modeString = (string)clickedItem.Tag;
+
+            Properties.Settings.Default.VisualizerMode = modeString;
+
+            UncheckAllVisualizerModeItems();
+
+            clickedItem.Checked = true;
+
+            try
+            {
+                visualizer.UpdateFromSettings();
+            }
+            catch (ModeNotFoundException)
+            {
+                //This shouldn't happen...
+                //On a ModeNotFoundException, reset the default mode to "Spectrum,Spectrum". This mode is built-in, and should never not be found
+                Properties.Settings.Default.VisualizerMode = "Spectrum,Spectrum";
+                visualizer.UpdateFromSettings();
+            }
+            Properties.Settings.Default.Save();
+        }
 
         //Updates the keyboard visualizer, and if we lose Exclusive Control, shuts the program down
         private void visUpdateTimer_Tick(object sender, EventArgs e)
@@ -80,6 +116,14 @@ namespace CUEAudioVisualizer
                     Application.Exit();
                 }
                 else throw;
+            }
+            catch (WASAPIInitializationException exc)
+            {
+                //Unable to initialize specified wasapi device! Set the device back to -1, and show the user a message saying so.
+                int oldDeviceIndex = Properties.Settings.Default.DeviceIndex;
+                Properties.Settings.Default.DeviceIndex = -1;
+                visualizer.UpdateFromSettings();
+                mainNotifyIcon.ShowBalloonTip(5000, "Unable to initialize device " + oldDeviceIndex.ToString(), string.Format("{0} BASS Error is : {1}", exc.Message, exc.OptionalError.HasValue ? exc.OptionalError.Value.ToString() : "No BASS error!"), ToolTipIcon.Error);
             }
         }
 
@@ -136,38 +180,6 @@ namespace CUEAudioVisualizer
             }
         }
 
-        //Changes Vis mode to Spectrum
-        private void spectrumToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            vUToolStripMenuItem.Checked = false;
-            spectrumToolStripMenuItem.Checked = true;
-            visualizer.VisualizerMode = KeyboardVisualizerMode.Spectrum;
-            Properties.Settings.Default.VisualizerMode = "Spectrum";
-            Properties.Settings.Default.Save();
-        }
-
-        //Changes Vis mode to VU
-        private void vUToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            vUToolStripMenuItem.Checked = true;
-            spectrumToolStripMenuItem.Checked = false;
-            visualizer.VisualizerMode = KeyboardVisualizerMode.VUMeter;
-            Properties.Settings.Default.VisualizerMode = "VU";
-            Properties.Settings.Default.Save();
-        }
-
-        //Helper function to set checked visualizer button
-        private void SetCheckedVisualizerButton()
-        {
-            if (Properties.Settings.Default.VisualizerMode == "Spectrum")
-            {
-                spectrumToolStripMenuItem.Checked = true;
-            }
-            else
-            {
-                vUToolStripMenuItem.Checked = true;
-            }
-        }
         #endregion
 
         #region Utility/Helper functions
@@ -213,6 +225,21 @@ namespace CUEAudioVisualizer
             AddDeviceToMenuItem("Reload Devices...", -2, false);
         }
 
+        private void AddVisualizerModes()
+        {
+            //Add all loaded visualizers into the ContextMenuStrip and makes them selectable
+            visualizerModeToolStripMenuItem.DropDownItems.Clear();
+            foreach (IPlugin currentPlugin in visualizer.VisualizerPlugins)
+            {
+                //If the plugin has no modes, consider it a bugged plugin and skip it
+                if (currentPlugin.ModeList == null || currentPlugin.ModeList.Length == 0)
+                {
+                    continue;
+                }
+                AddPluginToMenuItem(currentPlugin);
+            }
+        }
+
         //Builds a ToolStripMenuItem from a WASAPI device string/id
         private void AddDeviceToMenuItem(string deviceName, int deviceId, bool setChecked)
         {
@@ -223,6 +250,54 @@ namespace CUEAudioVisualizer
             currentDeviceItem.Checked = setChecked;
             currentDeviceItem.Click += currentDeviceItem_Click;
             deviceSelectionToolStripMenuItem.DropDownItems.Add(currentDeviceItem);
+        }
+
+        private void AddPluginToMenuItem(IPlugin plugin)
+        {
+            string storedMode = Properties.Settings.Default.VisualizerMode;
+
+            ToolStripMenuItem currentPluginItem = new ToolStripMenuItem();
+            currentPluginItem.Name = "Plugin " + plugin.Name;
+            if (plugin.ModeList.Length == 1)
+            {
+                //The main item will be clickable
+                currentPluginItem.Text = plugin.ModeList[0].ModeName;
+                string currentModeTag = string.Format("{0},{1}", plugin.Name, plugin.ModeList[0].ModeName);
+                currentPluginItem.Tag = currentModeTag;
+                currentPluginItem.Checked = currentModeTag == storedMode;
+                currentPluginItem.Click += ChangeVisualizerModeItemClicked;
+            }
+            else
+            {
+                //The main item will not be clickable, only it's sub-items.
+                currentPluginItem.Text = plugin.Name;
+                foreach (VisualizerModes currentMode in plugin.ModeList)
+                {
+                    ToolStripMenuItem currentModeItem = new ToolStripMenuItem();
+                    currentModeItem.Name = "Plugin " + plugin.Name + ", Mode " + currentMode.ModeName;
+                    currentModeItem.Text = currentMode.ModeName;
+                    string currentModeTag = string.Format("{0},{1}", plugin.Name, currentMode.ModeName);
+                    currentModeItem.Tag = currentModeTag;
+                    currentModeItem.Checked = currentModeTag == storedMode;
+                    currentModeItem.Click += ChangeVisualizerModeItemClicked;
+
+                    currentPluginItem.DropDownItems.Add(currentModeItem);
+                }
+            }
+
+            visualizerModeToolStripMenuItem.DropDownItems.Add(currentPluginItem);
+        }
+
+        private void UncheckAllVisualizerModeItems()
+        {
+            foreach (ToolStripMenuItem currentItem in visualizerModeToolStripMenuItem.DropDownItems)
+            {
+                currentItem.Checked = false;
+                foreach (ToolStripMenuItem currentSubItem in currentItem.DropDownItems)
+                {
+                    currentSubItem.Checked = false;
+                }
+            }
         }
 
         //Shows a notify icon if no device is selected

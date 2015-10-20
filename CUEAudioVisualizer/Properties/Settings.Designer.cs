@@ -25,7 +25,7 @@ namespace CUEAudioVisualizer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Blue")]
+        [global::System.Configuration.DefaultSettingValueAttribute("150, 150, 255")]
         public global::System.Drawing.Color PrimaryColor {
             get {
                 return ((global::System.Drawing.Color)(this["PrimaryColor"]));
@@ -37,7 +37,7 @@ namespace CUEAudioVisualizer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("150, 150, 255")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Blue")]
         public global::System.Drawing.Color SecondaryColor {
             get {
                 return ((global::System.Drawing.Color)(this["SecondaryColor"]));
@@ -61,7 +61,7 @@ namespace CUEAudioVisualizer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Spectrum")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Spectrum,Spectrum")]
         public string VisualizerMode {
             get {
                 return ((string)(this["VisualizerMode"]));

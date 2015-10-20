@@ -39,8 +39,6 @@
             this.secondaryColorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deviceSelectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.visualizerModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.spectrumToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.vUToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.visUpdateTimer = new System.Windows.Forms.Timer(this.components);
@@ -62,7 +60,7 @@
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.mainMenuStrip.Name = "mainMenuStrip";
-            this.mainMenuStrip.Size = new System.Drawing.Size(161, 98);
+            this.mainMenuStrip.Size = new System.Drawing.Size(161, 120);
             // 
             // colorToolStripMenuItem
             // 
@@ -113,26 +111,9 @@
             // 
             // visualizerModeToolStripMenuItem
             // 
-            this.visualizerModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.spectrumToolStripMenuItem,
-            this.vUToolStripMenuItem});
             this.visualizerModeToolStripMenuItem.Name = "visualizerModeToolStripMenuItem";
             this.visualizerModeToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.visualizerModeToolStripMenuItem.Text = "Visualizer Mode";
-            // 
-            // spectrumToolStripMenuItem
-            // 
-            this.spectrumToolStripMenuItem.Name = "spectrumToolStripMenuItem";
-            this.spectrumToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
-            this.spectrumToolStripMenuItem.Text = "Spectrum";
-            this.spectrumToolStripMenuItem.Click += new System.EventHandler(this.spectrumToolStripMenuItem_Click);
-            // 
-            // vUToolStripMenuItem
-            // 
-            this.vUToolStripMenuItem.Name = "vUToolStripMenuItem";
-            this.vUToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
-            this.vUToolStripMenuItem.Text = "VU";
-            this.vUToolStripMenuItem.Click += new System.EventHandler(this.vUToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -179,8 +160,6 @@
         private System.Windows.Forms.ToolStripMenuItem secondaryToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deviceSelectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem visualizerModeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem spectrumToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem vUToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem secondaryColorMenuItem;
     }
 }

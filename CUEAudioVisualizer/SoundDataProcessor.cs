@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CUEAudioVisualizer.Exceptions;
 using Un4seen.Bass;
 using Un4seen.BassWasapi;
 
@@ -71,15 +72,17 @@ namespace CUEAudioVisualizer
             BASS_WASAPI_DEVICEINFO devInfo = BassWasapi.BASS_WASAPI_GetDeviceInfo(WASAPIDeviceIndex);
             if (devInfo == null)
             {
-                throw new ApplicationException("Device " + WASAPIDeviceIndex + " is invalid!");
+                throw new WASAPIInitializationException("Device " + WASAPIDeviceIndex + " is invalid!");
             }
             if (!BassWasapi.BASS_WASAPI_Init(WASAPIDeviceIndex, devInfo.mixfreq, 2, BASSWASAPIInit.BASS_WASAPI_AUTOFORMAT | BASSWASAPIInit.BASS_WASAPI_BUFFER, 0f, 0f, WasapiProc, IntPtr.Zero))
             {
-                throw new ApplicationException("Unable to initialize WASAPI device " + WASAPIDeviceIndex);
+                BASSError error = Bass.BASS_ErrorGetCode();
+                throw new WASAPIInitializationException("Unable to initialize WASAPI device " + WASAPIDeviceIndex, error);
             }
             if (!BassWasapi.BASS_WASAPI_Start())
             {
-                throw new ApplicationException("Unable to start WASAPI!");
+                BASSError error = Bass.BASS_ErrorGetCode();
+                throw new WASAPIInitializationException("Unable to start WASAPI!", error);
             }
             Console.WriteLine("WASAPI device initialized");
             deviceNumber = WASAPIDeviceIndex;

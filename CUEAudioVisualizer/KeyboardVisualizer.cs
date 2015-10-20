@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -8,24 +9,47 @@ using CUE.NET.Devices.Generic.Enums;
 using CUE.NET.Devices.Keyboard;
 using CUE.NET.Devices.Keyboard.Keys;
 using CUE.NET.Exceptions;
+using CUEAudioVisualizer.Exceptions;
+using CUEAudioVisualizer.Plugin;
+using CUEAudioVisualizer.Plugins;
 
 namespace CUEAudioVisualizer
 {
     //This code was originally from a Console application so there's a bit of Console.WriteLines that I haven't bothered to clean up
-    class KeyboardVisualizer
+    class KeyboardVisualizer : IPluginHost
     {
-        public KeyboardVisualizerMode VisualizerMode { get; set; }
+        #region IPluginHost interface implementation
+        public float[] SmoothedBarData { get { return DataProcessor.BarValues; } }
 
-        private CorsairKeyboard Keyboard;
+        public float AveragedVolume { get { return DataProcessor.AveragedVolume; } }
+
+        public float ImmediateVolume { get { return DataProcessor.ImmediateVolume; } }
+
+        public float SongBeat { get { return DataProcessor.SongBeat; } }
+
+        public double Time { get { return stopwatch.Elapsed.TotalSeconds; } }
+
+        public Color PrimaryColor { get { return beatHigh; } }
+
+        public Color SecondaryColor { get { return beatLow; } }
+
+        public CorsairKeyboard Keyboard { get { return keyboard; } }
+        #endregion
+        public List<IPlugin> VisualizerPlugins { get; private set; }
+
+        private CorsairKeyboard keyboard;
         private SoundDataProcessor DataProcessor;
         private Color beatLow = Color.FromArgb(150, 150, 255);
         private Color beatHigh = Color.FromArgb(0, 0, 255);
+        private Stopwatch stopwatch = new Stopwatch();
+        private VisualizerModes activeMode = null;
 
         public KeyboardVisualizer()
         {
-            VisualizerMode = KeyboardVisualizerMode.Spectrum;
+            VisualizerPlugins = new List<IPlugin>();
             DataProcessor = new SoundDataProcessor(Properties.Settings.Default.DeviceIndex);
-            UpdateFromSettings();
+            LoadPlugins();
+            stopwatch.Start();
         }
 
         #region CUE Initialization Functions
@@ -80,7 +104,7 @@ namespace CUEAudioVisualizer
             return true;
         }
 
-        //Checks the Keyboard is not null
+        //Checks the Keyboard is not null, and hands the instance to any IPlugins
         private bool ValidateKeyboard()
         {
             if (Keyboard == null)
@@ -111,7 +135,7 @@ namespace CUEAudioVisualizer
         //Checks that we have a valid KeyboardSDK instance
         private bool CheckForKeyboard()
         {
-            Keyboard = CueSDK.KeyboardSDK;
+            keyboard = CueSDK.KeyboardSDK;
             if (!CheckForCUEError() || Keyboard == null)
             {
                 Console.WriteLine("No Corsair keyboard connected!.");
@@ -132,14 +156,8 @@ namespace CUEAudioVisualizer
             beatLow = Properties.Settings.Default.SecondaryColor;
             DataProcessor.VolumeScalar = Properties.Settings.Default.VolumeModifier;
             DataProcessor.WASAPIDeviceIndex = Properties.Settings.Default.DeviceIndex;
-            if (Properties.Settings.Default.VisualizerMode == "Spectrum")
-            {
-                VisualizerMode = KeyboardVisualizerMode.Spectrum;
-            }
-            else if (Properties.Settings.Default.VisualizerMode == "VU")
-            {
-                VisualizerMode = KeyboardVisualizerMode.VUMeter;
-            }
+
+            TrySetActiveVisualizer();
         }
 
         //Visualizes keyboard from DataProcessor data
@@ -158,80 +176,59 @@ namespace CUEAudioVisualizer
             
             kb.Color = Color.Black; //Clear keyboard colors
 
-            if (VisualizerMode == KeyboardVisualizerMode.Spectrum)
+            if (activeMode != null)
             {
-                VisualizeSpectrum();
-            }
-            else if (VisualizerMode == KeyboardVisualizerMode.VUMeter)
-            {
-                VisualizeVU();
+                activeMode.UpdateDelegate();
             }
 
             Keyboard.UpdateLeds();
         }
 
-        //Handles the Spectrum Visualization
-        private void VisualizeSpectrum()
+        //Loads built-in plugins, and all plugins from Plugins folder, if it exists.
+        private void LoadPlugins()
         {
-            double brightness = Utility.Clamp(0.03f + (DataProcessor.SongBeat * 0.1f), 0f, 1f); //Keep brightness at least to 3% and clamp to 100% (Should never get anywhere near 100%)
-            Color backgroundColor = Utility.CalculateGradient(beatLow, beatHigh, DataProcessor.AveragedVolume, brightness);
-            Keyboard.Color = backgroundColor;
+            IPlugin SpectrumPlugin = new SpectrumPlugin();
+            IPlugin VUPlugin = new VUPlugin();
 
-            float kbWidth = Keyboard.KeyboardRectangle.Location.X + Keyboard.KeyboardRectangle.Width;
-            float kbHeight = Keyboard.KeyboardRectangle.Location.Y + Keyboard.KeyboardRectangle.Height;
-            float barCount = SoundDataProcessor.BarCount;
+            SpectrumPlugin.Host = this;
+            VUPlugin.Host = this;
 
-            foreach (CorsairKey key in Keyboard.Keys)
+            VisualizerPlugins.Add(SpectrumPlugin);
+            VisualizerPlugins.Add(VUPlugin);
+
+            IPlugin[] plugins = PluginLoader.LoadPlugins();
+
+            if (plugins == null) return;
+
+            foreach (IPlugin currentPlugin in plugins)
             {
-                //Calculate the color for each individual key, and light it up if necessary
-                RectangleF keyRect = key.KeyRectangle;
-                PointF keyCenterPos = new PointF(keyRect.Location.X + (keyRect.Width / 2f), keyRect.Location.Y + (keyRect.Height / 2f)); //Sample center of key
-                int barSampleIndex = (int)Math.Floor(barCount * (keyCenterPos.X / kbWidth)); //Calculate bar sampling index
-                float curBarHeight = 1f - Utility.Clamp(DataProcessor.BarValues[barSampleIndex] * 1.5f, 0f, 1f); //Scale values up a bit and clamp to 1f. I also invert this value since the keyboard is laid out with topleft being point 0,0
-                float keyVerticalPos = (keyCenterPos.Y / kbHeight);
-
-                if (curBarHeight <= keyVerticalPos)
-                {
-                    //Key should be fully lit
-                    key.Led.Color = Utility.CalculateGradient(beatHigh, beatLow, DataProcessor.AveragedVolume, 1f);
-                }
-                else
-                {
-                    //Do whatever we do for unlit keys, which is currently nothing
-                }
-
+                currentPlugin.Host = this;
             }
         }
 
-        //Handles the VU Visualization
-        private void VisualizeVU()
+        //Tries to set the active visualizer from a stored settings key. Throws a ModeNotFoundException if the mode does not exist.
+        private void TrySetActiveVisualizer()
         {
-            double brightness = Utility.Clamp(0.03f + (DataProcessor.SongBeat * 0.1f), 0f, 1f); //Keep brightness at least to 3% and clamp to 100% (Should never get anywhere near 100%)
-            Color backgroundColor = Utility.CalculateGradient(beatLow, beatHigh, DataProcessor.AveragedVolume, brightness);
-            Keyboard.Color = backgroundColor;
-
-            float kbWidth = Keyboard.KeyboardRectangle.Location.X + Keyboard.KeyboardRectangle.Width;
-            float immediateVolume = DataProcessor.ImmediateVolume; //Scale down a bit since the kbWidth 
-            foreach (CorsairKey key in Keyboard.Keys)
+            string storedModeName = Properties.Settings.Default.VisualizerMode;
+            foreach (IPlugin currentPlugin in VisualizerPlugins)
             {
-                //Determine if key should be lit based on overall volume
-                RectangleF keyRect = key.KeyRectangle;
-                PointF keyCenterPos = new PointF(keyRect.Location.X + (keyRect.Width / 2f), keyRect.Location.Y + (keyRect.Height / 2f)); //Sample center of key
-
-                float keyHorVal = (keyCenterPos.X / kbWidth);
-
-                if (immediateVolume >= keyHorVal)
+                foreach (VisualizerModes currentMode in currentPlugin.ModeList)
                 {
-                    //Key should be fully lit
-                    key.Led.Color = Utility.CalculateGradient(beatHigh, beatLow, DataProcessor.AveragedVolume, 1f);
+                    string currentModeKey = string.Format("{0},{1}", currentPlugin.Name, currentMode.ModeName);
+                    if (storedModeName == currentModeKey)
+                    {
+                        //Found our saved mode, set as active mode
+                        activeMode = currentMode;
+                        return;
+                    }
                 }
-                else
-                {
-                    //Do whatever we do for unlit keys, which is currently nothing
-                }
+            }
+
+            if (storedModeName != "")
+            {
+                throw new ModeNotFoundException("Unable to find saved mode " + storedModeName);
             }
         }
         #endregion
-
     }
 }
