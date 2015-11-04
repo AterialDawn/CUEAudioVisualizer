@@ -22,17 +22,8 @@ namespace CUEAudioVisualizer.Plugins
         {
             modeList = new VisualizerModes[] { new VisualizerModes("Spectrum", SpectrumUpdateDelegate),
                 new VisualizerModes("Spectrum (VaryingColors)", SpectrumInvertingColorsDelegate),
-                new VisualizerModes("Spectrum (Rainbow)", SpectrumRainbowDelegate)};
-        }
-
-        public void OnModeActivated(VisualizerModes ActivatedMode)
-        {
-            //Do nothing
-        }
-
-        public void OnModeDeactivated(VisualizerModes DeactivatedMode)
-        {
-            //Do nothing
+                new VisualizerModes("Spectrum (Rainbow Foreground)", SpectrumRainbowForegroundDelegate),
+            new VisualizerModes("Spectrum (Rainbow Background)", SpectrumRainbowBackgroundDelegate)};
         }
 
         //Updates the keyboard using the Spectrum Visualizer
@@ -101,10 +92,8 @@ namespace CUEAudioVisualizer.Plugins
             }
         }
 
-        private void SpectrumRainbowDelegate()
+        private void SpectrumRainbowBackgroundDelegate()
         {
-            double brightness = 1f; //Fixed full brightness on rainbow background
-
             float kbWidth = Host.Keyboard.KeyboardRectangle.Location.X + Host.Keyboard.KeyboardRectangle.Width;
             float kbHeight = Host.Keyboard.KeyboardRectangle.Location.Y + Host.Keyboard.KeyboardRectangle.Height;
             float barCount = SoundDataProcessor.BarCount;
@@ -129,6 +118,36 @@ namespace CUEAudioVisualizer.Plugins
                     //'unlit' keys will be rainbow gradiented
                     float t = (float)(((keyHorizontalPos + (Host.Time * 0.4)) / 2f) + ((keyVerticalPos + (Host.Time * 0.4)) * 0.25f)) % 1f;
                     key.Led.Color = Utility.CalculateRainbowGradient(t);
+                }
+            }
+        }
+
+        private void SpectrumRainbowForegroundDelegate()
+        {
+            float kbWidth = Host.Keyboard.KeyboardRectangle.Location.X + Host.Keyboard.KeyboardRectangle.Width;
+            float kbHeight = Host.Keyboard.KeyboardRectangle.Location.Y + Host.Keyboard.KeyboardRectangle.Height;
+            float barCount = SoundDataProcessor.BarCount;
+
+            foreach (CorsairKey key in Host.Keyboard.Keys)
+            {
+                //Calculate the color for each individual key, and light it up if necessary
+                RectangleF keyRect = key.KeyRectangle;
+                PointF keyCenterPos = new PointF(keyRect.Location.X + (keyRect.Width / 2f), keyRect.Location.Y + (keyRect.Height / 2f)); //Sample center of key
+                float keyVerticalPos = (keyCenterPos.Y / kbHeight);
+                float keyHorizontalPos = (keyCenterPos.X / kbWidth);
+                int barSampleIndex = (int)Math.Floor(barCount * (keyCenterPos.X / kbWidth)); //Calculate bar sampling index
+                float curBarHeight = 1f - Utility.Clamp(Host.SmoothedBarData[barSampleIndex] * 1.5f, 0f, 1f); //Scale values up a bit and clamp to 1f. I also invert this value since the keyboard is laid out with topleft being point 0,0
+
+                if (curBarHeight <= keyVerticalPos)
+                {
+                    //Lit key will be rainbow foreground
+                    float t = (float)(((keyHorizontalPos + (Host.Time * 0.4)) / 2f) + ((keyVerticalPos + (Host.Time * 0.4)) * 0.25f)) % 1f;
+                    key.Led.Color = Utility.CalculateRainbowGradient(t);
+                }
+                else
+                {
+                    //'unlit' keys will be set to secondary color
+                    key.Led.Color = Host.SecondaryColor;
                 }
 
             }

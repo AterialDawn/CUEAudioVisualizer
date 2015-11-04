@@ -16,6 +16,7 @@ namespace CUEAudioVisualizer
 
         public float[] BarValues = new float[BarCount];
         public float VolumeScalar = 1f;
+        public float SmoothingScalar = 0f;
         public float SongBeat = 0;
         public float AveragedVolume = 0;
         public float ImmediateVolume = 0;
@@ -25,6 +26,8 @@ namespace CUEAudioVisualizer
         private float[] fftData = new float[4096];
         private float[] freqVolScalar = new float[BarCount];
         private float[] barValues = new float[BarCount];
+        private float[] lastBarValues = new float[BarCount];
+        private float lastBeat = 0f;
         private int sampleFrequency = 48000;
         private int MaximumFrequency = 21000;
         private int MinimumFrequency = 0;
@@ -122,6 +125,8 @@ namespace CUEAudioVisualizer
             preScaled1 += barValues[barIndex + 1];
             preScaled1 /= 2f;
             BarValues[barIndex] = Utility.Clamp(preScaled1, 0f, 1f);
+            BarValues[barIndex] = Utility.LinearInterpolate(BarValues[barIndex], lastBarValues[barIndex], SmoothingScalar); //man this is nasty
+            lastBarValues[barIndex] = BarValues[barIndex];
 
             barIndex++;
 
@@ -130,6 +135,8 @@ namespace CUEAudioVisualizer
             preScaled1 += barValues[barIndex + 1] * 0.75f;
             preScaled1 /= 2.5f;
             BarValues[barIndex] = Utility.Clamp(preScaled1, 0f, 1f);
+            BarValues[barIndex] = Utility.LinearInterpolate(BarValues[barIndex], lastBarValues[barIndex], SmoothingScalar);
+            lastBarValues[barIndex] = BarValues[barIndex];
 
             for (barIndex = 2; barIndex < 50; barIndex++)
             {
@@ -140,6 +147,8 @@ namespace CUEAudioVisualizer
                 preScaled += barValues[barIndex + 2] * 0.5f;
                 preScaled /= 3.5f;
                 BarValues[barIndex] = Utility.Clamp(preScaled, 0f, 1f);
+                BarValues[barIndex] = Utility.LinearInterpolate(BarValues[barIndex], lastBarValues[barIndex], SmoothingScalar);
+                lastBarValues[barIndex] = BarValues[barIndex];
             }
             for (barIndex = 50; barIndex < 999; barIndex++)
             {
@@ -148,11 +157,15 @@ namespace CUEAudioVisualizer
                 preScaled += barValues[barIndex + 1] * 0.75f;
                 preScaled /= 2.5f;
                 BarValues[barIndex] = Utility.Clamp(preScaled, 0f, 1f);
+                BarValues[barIndex] = Utility.LinearInterpolate(BarValues[barIndex], lastBarValues[barIndex], SmoothingScalar);
+                lastBarValues[barIndex] = BarValues[barIndex];
             }
             preScaled = barValues[barIndex - 1];
             preScaled += barValues[barIndex];
             preScaled /= 2f;
             BarValues[barIndex] = Utility.Clamp(preScaled, 0f, 1f);
+            BarValues[barIndex] = Utility.LinearInterpolate(BarValues[barIndex], lastBarValues[barIndex], SmoothingScalar);
+            lastBarValues[barIndex] = BarValues[barIndex];
 
             //Calculate the song beat
             float Sum = 0f;
@@ -161,6 +174,8 @@ namespace CUEAudioVisualizer
                 Sum += (float)Math.Sqrt(barValues[i]); //Prettier scaling > Accurate scaling
             }
             SongBeat = (Sum / 25f);
+            SongBeat = Utility.LinearInterpolate(SongBeat, lastBeat, SmoothingScalar);
+            lastBeat = SongBeat;
         }
 
         

@@ -82,5 +82,17 @@ namespace CUEAudioVisualizer.Properties {
                 this["VolumeModifier"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public float SmoothingModifier {
+            get {
+                return ((float)(this["SmoothingModifier"]));
+            }
+            set {
+                this["SmoothingModifier"] = value;
+            }
+        }
     }
 }

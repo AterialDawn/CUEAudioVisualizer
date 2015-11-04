@@ -156,6 +156,7 @@ namespace CUEAudioVisualizer
             beatLow = Properties.Settings.Default.SecondaryColor;
             DataProcessor.VolumeScalar = Properties.Settings.Default.VolumeModifier;
             DataProcessor.WASAPIDeviceIndex = Properties.Settings.Default.DeviceIndex;
+            DataProcessor.SmoothingScalar = Properties.Settings.Default.SmoothingModifier;
 
             TrySetActiveVisualizer();
         }
@@ -203,6 +204,7 @@ namespace CUEAudioVisualizer
             foreach (IPlugin currentPlugin in plugins)
             {
                 currentPlugin.Host = this;
+                VisualizerPlugins.Add(currentPlugin);
             }
         }
 

@@ -8,11 +8,19 @@ namespace CUEAudioVisualizer.Plugin
 {
     public interface IPlugin
     {
+        /// <summary>
+        /// Plugin name
+        /// </summary>
         string Name { get; }
-        IPluginHost Host { get; set; }
-        VisualizerModes[] ModeList { get;}
 
-        void OnModeActivated(VisualizerModes ActivatedMode);
-        void OnModeDeactivated(VisualizerModes DeactivatedMode);
+        /// <summary>
+        /// Plugin host instance, set by the host after plugin has been instantiated
+        /// </summary>
+        IPluginHost Host { get; set; }
+
+        /// <summary>
+        /// List of modes the plugin has, must have at least 1 mode
+        /// </summary>
+        VisualizerModes[] ModeList { get;}
     }
 }

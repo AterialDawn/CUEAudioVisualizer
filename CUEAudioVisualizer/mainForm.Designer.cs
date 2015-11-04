@@ -39,6 +39,9 @@
             this.secondaryColorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deviceSelectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.visualizerModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.smoothingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sensitivityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.visUpdateTimer = new System.Windows.Forms.Timer(this.components);
@@ -57,6 +60,7 @@
             this.colorToolStripMenuItem,
             this.deviceSelectionToolStripMenuItem,
             this.visualizerModeToolStripMenuItem,
+            this.optionsToolStripMenuItem,
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.mainMenuStrip.Name = "mainMenuStrip";
@@ -115,6 +119,28 @@
             this.visualizerModeToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.visualizerModeToolStripMenuItem.Text = "Visualizer Mode";
             // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.smoothingToolStripMenuItem,
+            this.sensitivityToolStripMenuItem});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.optionsToolStripMenuItem.Text = "Options";
+            // 
+            // smoothingToolStripMenuItem
+            // 
+            this.smoothingToolStripMenuItem.BackColor = System.Drawing.SystemColors.Control;
+            this.smoothingToolStripMenuItem.Name = "smoothingToolStripMenuItem";
+            this.smoothingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.smoothingToolStripMenuItem.Text = "Smoothing...";
+            // 
+            // sensitivityToolStripMenuItem
+            // 
+            this.sensitivityToolStripMenuItem.Name = "sensitivityToolStripMenuItem";
+            this.sensitivityToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.sensitivityToolStripMenuItem.Text = "Sensitivity...";
+            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
@@ -130,7 +156,7 @@
             // visUpdateTimer
             // 
             this.visUpdateTimer.Enabled = true;
-            this.visUpdateTimer.Interval = 15;
+            this.visUpdateTimer.Interval = 10;
             this.visUpdateTimer.Tick += new System.EventHandler(this.visUpdateTimer_Tick);
             // 
             // mainForm
@@ -161,5 +187,8 @@
         private System.Windows.Forms.ToolStripMenuItem deviceSelectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem visualizerModeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem secondaryColorMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem smoothingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sensitivityToolStripMenuItem;
     }
 }

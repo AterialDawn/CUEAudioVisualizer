@@ -21,6 +21,7 @@ namespace CUEAudioVisualizer
         public mainForm()
         {
             InitializeComponent();
+            AddTrackBarItems();
             mainNotifyIcon.Icon = this.Icon;
 
             visualizer = new KeyboardVisualizer();
@@ -252,6 +253,7 @@ namespace CUEAudioVisualizer
             deviceSelectionToolStripMenuItem.DropDownItems.Add(currentDeviceItem);
         }
 
+        //Adds plugins to visualizer modes item
         private void AddPluginToMenuItem(IPlugin plugin)
         {
             string storedMode = Properties.Settings.Default.VisualizerMode;
@@ -288,6 +290,7 @@ namespace CUEAudioVisualizer
             visualizerModeToolStripMenuItem.DropDownItems.Add(currentPluginItem);
         }
 
+        //Helper function
         private void UncheckAllVisualizerModeItems()
         {
             foreach (ToolStripMenuItem currentItem in visualizerModeToolStripMenuItem.DropDownItems)
@@ -307,6 +310,59 @@ namespace CUEAudioVisualizer
             {
                 mainNotifyIcon.ShowBalloonTip(5000, "No Device Selected", "Select a Device to start visualizing!", ToolTipIcon.Info);
             }
+        }
+
+        //Adds trackbar sliders and sets default values
+        private void AddTrackBarItems()
+        {
+            TrackBar sensitivityTrackBar = new TrackBar();
+            sensitivityTrackBar.AutoSize = false;
+            sensitivityTrackBar.Minimum = 0;
+            sensitivityTrackBar.Maximum = 500;
+            sensitivityTrackBar.Value = (int)(Properties.Settings.Default.VolumeModifier * 100f);
+            sensitivityTrackBar.TickStyle = TickStyle.None;
+            sensitivityTrackBar.Size = new System.Drawing.Size(175, 25);
+            sensitivityTrackBar.ValueChanged += sensitivityTrackBar_ValueChanged;
+
+            TrackBar smoothingTrackBar = new TrackBar();
+            smoothingTrackBar.AutoSize = false;
+            smoothingTrackBar.Minimum = 0;
+            smoothingTrackBar.Maximum = 990;
+            smoothingTrackBar.Value = (int)(Properties.Settings.Default.SmoothingModifier * 1000f);
+            smoothingTrackBar.TickStyle = TickStyle.None;
+            smoothingTrackBar.Size = new System.Drawing.Size(175, 25);
+            smoothingTrackBar.ValueChanged += smoothingTrackBar_ValueChanged;
+            
+            ToolStripControlHost sensitivityControlHost = new ToolStripControlHost(sensitivityTrackBar);
+            sensitivityControlHost.BackColor = Color.FromArgb(253, 253, 253);
+
+            ToolStripControlHost smoothingControlHost = new ToolStripControlHost(smoothingTrackBar);
+            smoothingControlHost.BackColor = Color.FromArgb(253, 253, 253);
+
+            smoothingToolStripMenuItem.DropDownItems.Add(smoothingControlHost);
+            sensitivityToolStripMenuItem.DropDownItems.Add(sensitivityControlHost);
+        }
+
+        //Changes smoothing factor for visualizer
+        void smoothingTrackBar_ValueChanged(object sender, EventArgs e)
+        {
+            TrackBar smoothingTrackBar = sender as TrackBar;
+            if (smoothingTrackBar == null) return; //Sanity check. Shouldn't happen.
+            float smoothingValue = (float)smoothingTrackBar.Value / 1000f; //Range 0.0 - 0.99
+
+            Properties.Settings.Default.SmoothingModifier = smoothingValue;
+            visualizer.UpdateFromSettings();
+        }
+
+        //Changes volume multiplier
+        private void sensitivityTrackBar_ValueChanged(object sender, EventArgs e)
+        {
+            TrackBar sensitivityTrackBar = sender as TrackBar;
+            if (sensitivityTrackBar == null) return; //Sanity check. Shouldn't happen.
+            float sensitivityValue = (float)sensitivityTrackBar.Value / 100f; //Range 0.0 - 5.0
+
+            Properties.Settings.Default.VolumeModifier = sensitivityValue;
+            visualizer.UpdateFromSettings();
         }
         #endregion
     }

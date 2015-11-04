@@ -26,16 +26,6 @@ namespace CUEAudioVisualizer.Plugins
                 new VisualizerModes("VU (Rainbow Right)", VURainbowRightDelegate)};
         }
 
-        public void OnModeActivated(VisualizerModes ActivatedMode)
-        {
-            //Do nothing
-        }
-
-        public void OnModeDeactivated(VisualizerModes DeactivatedMode)
-        {
-            //Do nothing
-        }
-
         private void VULeftDelegate()
         {
             double brightness = Utility.Clamp(0.03f + (Host.SongBeat * 0.1f), 0f, 1f); //Keep brightness at least to 3% and clamp to 100% (Should never get anywhere near 100%)
@@ -94,8 +84,6 @@ namespace CUEAudioVisualizer.Plugins
 
         private void VURainbowLeftDelegate()
         {
-            double brightness = 1f; //Brightness is fixed at 100% for rainbow modes.
-
             float kbWidth = Host.Keyboard.KeyboardRectangle.Location.X + Host.Keyboard.KeyboardRectangle.Width;
             float kbHeight = Host.Keyboard.KeyboardRectangle.Location.Y + Host.Keyboard.KeyboardRectangle.Height;
             float immediateVolume = Host.ImmediateVolume;
@@ -125,8 +113,6 @@ namespace CUEAudioVisualizer.Plugins
 
         private void VURainbowRightDelegate()
         {
-            double brightness = 1f; //Brightness is fixed at 100% for rainbow modes.
-
             float kbWidth = Host.Keyboard.KeyboardRectangle.Location.X + Host.Keyboard.KeyboardRectangle.Width;
             float kbHeight = Host.Keyboard.KeyboardRectangle.Location.Y + Host.Keyboard.KeyboardRectangle.Height;
             float immediateVolume = Host.ImmediateVolume;

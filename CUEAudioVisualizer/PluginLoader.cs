@@ -43,11 +43,12 @@ namespace CUEAudioVisualizer
         {
             try
             {
-                Assembly assembly = Assembly.LoadFile(filePath);
+                Assembly assembly = Assembly.LoadFile(Path.GetFullPath(filePath));
                 return assembly;
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 return null;
             }
         }
