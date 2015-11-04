@@ -64,7 +64,7 @@
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.mainMenuStrip.Name = "mainMenuStrip";
-            this.mainMenuStrip.Size = new System.Drawing.Size(161, 120);
+            this.mainMenuStrip.Size = new System.Drawing.Size(161, 142);
             // 
             // colorToolStripMenuItem
             // 
@@ -133,13 +133,13 @@
             this.smoothingToolStripMenuItem.BackColor = System.Drawing.SystemColors.Control;
             this.smoothingToolStripMenuItem.Name = "smoothingToolStripMenuItem";
             this.smoothingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.smoothingToolStripMenuItem.Text = "Smoothing...";
+            this.smoothingToolStripMenuItem.Text = "Smoothing";
             // 
             // sensitivityToolStripMenuItem
             // 
             this.sensitivityToolStripMenuItem.Name = "sensitivityToolStripMenuItem";
             this.sensitivityToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.sensitivityToolStripMenuItem.Text = "Sensitivity...";
+            this.sensitivityToolStripMenuItem.Text = "Sensitivity";
             // 
             // toolStripSeparator1
             // 
