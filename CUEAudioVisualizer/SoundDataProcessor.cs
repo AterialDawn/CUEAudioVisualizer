@@ -77,7 +77,7 @@ namespace CUEAudioVisualizer
             {
                 throw new WASAPIInitializationException("Device " + WASAPIDeviceIndex + " is invalid!");
             }
-            if (!BassWasapi.BASS_WASAPI_Init(WASAPIDeviceIndex, devInfo.mixfreq, 2, BASSWASAPIInit.BASS_WASAPI_AUTOFORMAT | BASSWASAPIInit.BASS_WASAPI_BUFFER, 0f, 0f, WasapiProc, IntPtr.Zero))
+            if (!BassWasapi.BASS_WASAPI_Init(WASAPIDeviceIndex, devInfo.mixfreq, devInfo.mixchans, BASSWASAPIInit.BASS_WASAPI_AUTOFORMAT | BASSWASAPIInit.BASS_WASAPI_BUFFER, 0f, 0f, WasapiProc, IntPtr.Zero))
             {
                 BASSError error = Bass.BASS_ErrorGetCode();
                 throw new WASAPIInitializationException("Unable to initialize WASAPI device " + WASAPIDeviceIndex, error);
